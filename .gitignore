@@ -1,6 +1,10 @@
 *.o
 *.so
 *~
+csv2any
 parse.c
 parse.h
 parser.out
+scan.c
+TAGS
+cscope*
