@@ -1,0 +1,102 @@
+.Dd Jun \&, 2021
+.Dt CSV2ANY \"[section number] [architecture/volume]
+.\".Os [OPERATING_SYSTEM] [version/release]
+.Sh NAME
+.Nm csv2any
+.Nd convert CSV file to other delimiters
+.Sh SYNOPSIS
+.Nm csv2any
+.Op Fl a
+.Op Fl l
+.Op Fl y
+.Op Fl r Ar rowsep
+.Op Fl t Ar colsep 
+.Op Fl w 
+.Op Ar files ...
+.Sh DESCRIPTION
+.Nm
+parses a comma-separated file (per RFC 4180) and produces the same
+data with different separators on standard output.
+Double-quotes (when used as quotation) are removed from the output; quoted characters (data) are preserved. 
+The utility is a demonstration of
+.Xr libcsv 3 ,
+included in the distribution. The available options are:
+.Bl -tag -width 5n
+.It Fl a
+Use ASCII delimiters US and RS for
+.Ar colsep
+and
+.Ar rowsep ,
+respectively. 
+.It Fl r Ar rowsep
+Replace newline separators with
+.Ar rowsep .
+On input, the newline character (\c
+.Ql \(rsn ,
+0x0A) may optionally be preceded by a carriage-return character (\c
+.Ql \(rsr ,
+0x0D).
+.It Fl t Ar colsep
+Replace comma separators with
+.Ar colsep .
+.It Fl w
+Warn if quoted data in the input match either colsep or rowsep.
+.El
+.Pp
+.Ar rowsep
+and
+.Ar colsep
+are arbitrary strings, not just single characters.
+A few special
+escape-sequences are supported for non-printing characters:
+.Bl -tag -width 5n -offset 7n -compact
+.It \(rs\(rs
+backslash
+.It \(rsa
+audible BEL
+.It \(rsb
+backspace
+.It \(rsf
+form feed
+.It \(rsn
+new line
+.It \(rsr
+return
+.It \(rst
+horizontal tab
+.It \(rsv
+vertical tab
+.El
+These sequences closely correspond to those supported by the GNU
+version of
+.Xr tr 1 .
+.
+.Pp
+In addition, there are two debugging options:
+.Bl -tag -width 5n
+.It Fl l
+Produce lexer progress messages on standard error
+.It Fl y
+Produce yacc progress messages on standard error
+.El
+.\" .Sh ENVIRONMENT
+.\" .Sh FILES
+.Sh EXIT STATUS
+.Nm
+exits with 0 status unless the input could not be parsed or memory is
+exhausted.
+.\" .Sh EXAMPLES
+.Sh DIAGNOSTICS
+Unless memory is exhausted, error messages from the parser are
+probably bugs, because almost any file can be treated as
+comma-delimited. Memory exhaustion
+.Dq "should not"
+happen, because the only memory used is for the data on each line, a
+line at a time.
+.\" .Sh COMPATIBILITY
+.\" .Sh SEE ALSO
+.\" .Sh STANDARDS
+.\" .Sh HISTORY
+.\" .Sh AUTHORS
+.\" .Sh CAVEATS
+.\" .Sh BUGS

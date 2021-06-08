@@ -9,6 +9,7 @@
 
 off_t pos;
 bool warn_quoted = false;
+char *field = NULL;
 
 #define YY_USER_ACTION pos += yyleng;
 
@@ -27,15 +28,18 @@ DATA [^\r\n"",]
 		
 %%
 
-{DATA}+/[,]        { yylval = strdup(yytext); return FIELD; }
-{DATA}+/\r?\n      { yylval = strdup(yytext); return FIELD; }
+{DATA}+/[,]        { field = strdup(yytext); }
+{DATA}+/\r?\n      { field = strdup(yytext); }
 [""]               { yy_push_state(quote); } 
 
-[,]                {}
+[,]                { yylval = field; field = NULL; return FIELD; }
 
-\r?\n              { return EOL; }
+\r?\n              { yylval = field; return EOL; }
 
 .                  { yyerror(yytext); errx(EXIT_FAILURE, "default rule"); }
+
+<<EOF>>            { if( !field ) yyterminate();
+                     yylval = field; field = NULL; return EOL; }
 
 <quote>{
   [^""]+           { append(yytext); }

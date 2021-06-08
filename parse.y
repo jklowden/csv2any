@@ -39,8 +39,9 @@ lines:		line
 	|	lines line 
 		;
 
-line:		fields eols
+line:		fields EOL
 		{
+		    add_field($2);
 		    assert(csv_callback);
 		    csv_callback(line.nfld, line.flds);
 		    free_fields();
@@ -51,14 +52,9 @@ fields:		field
 	|	fields field
 		;
 
-eols:		%empty
-	|	EOL
-	|	eols EOL
-		;
-
 field:		FIELD
 		{
-		    add_field(yylval);
+		    add_field($1);
 		}
 		;
 
@@ -166,7 +162,9 @@ recapitulate( int nelem, char *elems[] ) {
     char *comma = "";
 
     for( int i=0; i < nelem; i++ ) {
-	printf( "%s%s", comma, elems[i] );
+	const char *data = elems[i]? elems[i] : "";
+	
+	printf( "%s%s", comma, data );
 	comma = outsep.fs;
     }
 
