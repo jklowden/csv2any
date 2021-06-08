@@ -36,13 +36,20 @@ be parsed correctly.
   - the normal delimeters -- commma and newline characters -- are
     treated as data.
 - A "newline" may in fact be a 2-character 0x0d0a sequence, as is
-  conventional on Microsoft Windows.
+  conventional on Microsoft Windows. 
 - Per 4180, Spaces are considered part of a field. They're not
   skipped: a space following a separating comma is a leading blank in
   the next field.
 - The RFC says a CSV file "should contain the same number of fields"
   on every line. This parser does not require lines to have a
   consistent number of fields.
+
+## Minor Screed
+
+It is not hard to find on the interwebs such things as "tab-delimited
+CSV" files. This parser works on real CSV files, where "CSV" means
+*comma separated value*. It breaks lines into fields separated by
+commas, and only commas. If you need something else, you need something else. 
   
 # Notes on the project
 

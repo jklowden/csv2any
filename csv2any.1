@@ -1,4 +1,4 @@
-.Dd Jun \&, 2021
+.Dd June \& 2021
 .Dt CSV2ANY \"[section number] [architecture/volume]
 .\".Os [OPERATING_SYSTEM] [version/release]
 .Sh NAME
@@ -16,8 +16,10 @@
 .Sh DESCRIPTION
 .Nm
 parses a comma-separated file (per RFC 4180) and produces the same
-data with different separators on standard output.
-Double-quotes (when used as quotation) are removed from the output; quoted characters (data) are preserved. 
+data with different separators on standard output.  Double-quotes
+(when used as quotation) are removed from the output; quoted
+characters (data) are preserved.
+.Pp
 The utility is a demonstration of
 .Xr libcsv 3 ,
 included in the distribution. The available options are:
@@ -79,6 +81,12 @@ Produce lexer progress messages on standard error
 .It Fl y
 Produce yacc progress messages on standard error
 .El
+.
+.Pp
+In the absence of options, the input is recapitulated with two
+changes: all quoting is removed, and lines are terminated with a
+single newline (Ox0A) character.
+.
 .\" .Sh ENVIRONMENT
 .\" .Sh FILES
 .Sh EXIT STATUS
