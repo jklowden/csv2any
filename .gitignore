@@ -1,0 +1,6 @@
+*.o
+*.so
+*~
+parse.c
+parse.h
+parser.out
