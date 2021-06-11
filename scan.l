@@ -15,54 +15,64 @@ char *field = NULL;
 
 off_t position(void) { return pos; }
 
-static void append( const char *);
+static int set_yylval( int token );
+static void append_field( const char *);
 const char * warn_if( const char text[] );
 
 void yyerror( char const *s );
 %}
 
-NUM  [[:digit:]]+
-DATA [^\r\n"",]
+NUM    [[:digit:]]+
+DATA   [^\r\n,]+
+QUOTE  [[:blank:]]*[""]
 
 %x quote
 		
 %%
 
-{DATA}+/[,]        { field = strdup(yytext); }
-{DATA}+/\r?\n      { field = strdup(yytext); }
-[""]               { yy_push_state(quote); } 
+{DATA}             { field = strdup(yytext); }
 
-[,]                { yylval = field; field = NULL; return FIELD; }
+^{QUOTE}/{DATA}    { yy_push_state(quote); } 
+,{QUOTE}/{DATA}    { yy_push_state(quote); return set_yylval(FIELD); }
 
-\r?\n              { yylval = field; return EOL; }
+[,]                { return set_yylval(FIELD); }
+
+^[[:blank:]]*\r?\n {  /* ignore blank lines*/  }
+
+\r?\n              { return set_yylval(EOL); }
 
 .                  { yyerror(yytext); errx(EXIT_FAILURE, "default rule"); }
 
-<<EOF>>            { if( !field ) yyterminate();
-                     yylval = field; field = NULL; return EOL; }
+<<EOF>>            { if( !field ) yyterminate(); return set_yylval(EOL); }
 
 <quote>{
-  [^""]+           { append(yytext); }
-  [""]{2}          { append(yytext + 1); }
+  [^""]+           { append_field(yytext); }
+  [""]{2}          { append_field(yytext + 1); }
 
-  [""],            { yy_pop_state(); return FIELD; }
-  [""]/\r?\n?      { yy_pop_state(); return FIELD; }
+  [""]             { yy_pop_state(); }
 }
 
 %%
 
 static void
-append(const char text[]) {
+append_field(const char text[]) {
     char *data;
 
     if( warn_quoted ) {
-	warn_if( yylval );
+	warn_if( field );
     }
     
-    int n = asprintf( &data, "%s%s", yylval, text );
+    int n = asprintf( &data, "%s%s", field, text );
     if( n == -1 ) {
-	err(EXIT_FAILURE, "strcat(%s, %s)", yylval, text);
+	err(EXIT_FAILURE, "strcat(%s, %s)", field, text);
     }
-    free(yylval);
-    yylval = data;
+    free(field);
+    field = data;
+}
+
+static int
+set_yylval( int token ) {
+    yylval = field;
+    field = NULL;
+    return token;
 }
