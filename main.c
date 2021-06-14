@@ -1,3 +1,5 @@
+#include "csvany.h"
+
 #include <assert.h>
 #include <err.h>
 #include <stdbool.h>
@@ -6,21 +8,14 @@
 #include <string.h>
 #include <unistd.h>
 
-typedef int (*csvcb_t)( int, char *elems[] );
-extern csvcb_t csv_callback;
-
-extern bool warn_quoted;
-
 void set_fs( const char sep[] );
 void set_rs( const char sep[] );
 
-int yyparse(void);
-extern int yydebug, yy_flex_debug;
-extern FILE * yyin;
+extern int csvdebug, csv_flex_debug;
 
 int
 main( int argc, char *argv[] ) {
-  yy_flex_debug = 0;
+  csv_flex_debug = 0;
   int opt;
   int erc = EXIT_FAILURE;
   
@@ -29,10 +24,10 @@ main( int argc, char *argv[] ) {
     
     switch (opt) {
     case 'l': // flex debugging
-      yy_flex_debug = 1;
+      csv_flex_debug = 1;
       break;
     case 'y': // yacc debugging
-      yydebug = 1;
+      csvdebug = 1;
       break;
     case 't':
       set_fs(optarg);
@@ -53,15 +48,15 @@ main( int argc, char *argv[] ) {
   }
 
   if( argc == optind ) {
-    return yyparse();
+    return csvparse();
   }
   
   for( int i=optind; i < argc; i++ ) {
-    if( (yyin = fopen(argv[i], "r")) == NULL ) {
+    if( (csvin = fopen(argv[i], "r")) == NULL ) {
       err(EXIT_FAILURE, "could not open %s", argv[i]);
     }
 
-    if( (erc = yyparse()) != EXIT_SUCCESS ) {
+    if( (erc = csvparse()) != EXIT_SUCCESS ) {
       return erc;
     }
   }

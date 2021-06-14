@@ -10,11 +10,11 @@ PREFIX = /usr/local
 
 all: libanycsv.so csv2any
 
-csv2any: main.o
-	$(CC) -o $@ $^ \
+csv2any: main.o csvany.h| libanycsv.so
+	$(CC) -o $@ $< \
 	-L$(PWD) -Wl,-rpath -Wl,$(PWD) \
 	-L$(PREFIX) -Wl,-rpath -Wl,$(PREFIX) \
-	-lcsv
+	-lanycsv
 
 libanycsv.so: parse.o scan.o
 	$(CC) -o $@ -shared $(CPPFLAGS) $(CFLAGS) $^
@@ -25,9 +25,10 @@ scan.o: scan.c
 parse.c: parse.y
 	$(YACC) $(YFLAGS) -o$@ $^
 
+SRC = $(wildcard *.[yl]) main.c parse.h
 tags: TAGS
-TAGS:
-	etags *.[yl] main.c parse.h
+TAGS: $(SRC)
+	etags $^
 
 install: csv2any libanycsv.so 
 	install csv2any   $(PREFIX)/bin/

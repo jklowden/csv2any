@@ -1,8 +1,8 @@
 # csv2any
 
-csv2any is a simple command-line utility to convert CSV files to use
-other delimiters. It is a full CSV parser; any failure to process a
-CSV file that meets the specification is considered a bug.
+csv2any is a command-line utility to convert CSV files to use other
+delimiters. It is a full CSV parser; any failure to process a CSV file
+that meets the specification is considered a bug.
 
 The utility was prompted by an unmet need. Many command-line and
 database utilities read "delimited" files, but do not parse CSV files
@@ -11,19 +11,20 @@ correctly. If one simply splits the lines on commas (with `sed` or
 csv2any, the file can be converted to use delimiters that don't appear
 in the data, making quoting unnecessary.
 
-# libcsv
+# libanycsv
 
-The project produces a library, `libcsv.so`, that can be used to
+The project produces a library, `libanycsv.so`, that can be used to
 process a CSV file. The user provides a callback function that accepts
-an array of strings, similar to `argc` and `argv`. That function is
-called for each parsed line in the file.
+an array of strings. That function is called for each parsed line in
+the file.
 
 # Notes on the parser
 
 Many CSV files do not conform to RFC 4180.  Some so-called CSV files
 aren't even comma-delimited!
 
-The parser takes the RFC seriously but with some allowances.
+The parser takes the RFC seriously but with some allowances.  See the
+man page **libanycsv**(3) for details.
 
 - The encoding of a CSV file is not defined by the RFC. Because this
 parser is based on GNU flex, it's looking for the ASCII values of the
@@ -35,14 +36,6 @@ be parsed correctly.
   character.
   - the normal delimeters -- commma and newline characters -- are
     treated as data.
-- A "newline" may in fact be a 2-character 0x0d0a sequence, as is
-  conventional on Microsoft Windows. 
-- Per 4180, Spaces are considered part of a field. They're not
-  skipped: a space following a separating comma is a leading blank in
-  the next field.
-- The RFC says a CSV file "should contain the same number of fields"
-  on every line. This parser does not require lines to have a
-  consistent number of fields.
 
 ## Minor Screed
 
@@ -69,8 +62,10 @@ It installs in `/usr/local` by default. To override:
 The project requires the **GNU flex** and **GNU bison**
 implementations of lex and yacc. 
 
+The programs are written in C, written to the C11 standard. If your
+system doesn't have `stdbool.h` or complains about local variables not
+declared at the top of functions, you need a newer compiler or an
+older library.
+
 Development was done on Linux, but the project is expected to build in
 any Posix environment with a C99 compiler.
-
-
-

@@ -21,10 +21,10 @@ csvlcb_t csv_line_callback = recapitulate;
 typedef char * (*csvfcb_t)( char elem[] );
 csvfcb_t csv_field_callback = NULL;
 
-extern int yylineno, yyleng;
+extern int csvlineno, csvleng;
 
-int yylex(void);
-void yyerror( char const *s );
+int csvlex(void);
+void csverror( char const *s );
 %}
 			
 %token EOL FIELD
@@ -33,6 +33,8 @@ void yyerror( char const *s );
 %defines "parse.h"
 
 %define api.value.type {char *}
+
+%define api.prefix {csv}
 
 %%
 
@@ -103,9 +105,9 @@ free_fields() {
 }
 
 void
-yyerror( char const *s ) {
+csverror( char const *s ) {
     warnx( "%s on line %d at '%.*s'",
-	   s, yylineno, yyleng, yylval);
+	   s, csvlineno, csvleng, csvlval);
 }
 
 static struct {
@@ -156,12 +158,12 @@ warn_if( const char text[] ) {
     const char *s;
     if( (s = strstr(text, outsep.fs)) != NULL ) {
 	warnx( "line %d: quoted text in field %zu matches field separator",
-	       yylineno, line.nfld );
+	       csvlineno, line.nfld );
 	return s;
     }
     if( (s = strstr(text, outsep.rs)) != NULL ) {
 	warnx( "line %d: quoted text in field %zu matches record separator",
-	       yylineno, line.nfld );
+	       csvlineno, line.nfld );
     }
     return s;
 }

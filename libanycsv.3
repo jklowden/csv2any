@@ -1,0 +1,186 @@
+.Dd June \& 2021
+.Dt LIBANYCSV 3 \" [architecture/volume]
+.\".Os [OPERATING_SYSTEM] [version/release]
+.Sh NAME
+.Nm libanycsv
+.Nd parse CSV file for interpretation by application
+.Sh SYNOPSIS
+.In anycsv.h
+.
+.Vt FILE* Va csvin ;
+
+.
+.Vt bool Li ( Li Ns Vt *csvlcb_t Ns Li )( Fa "int argc" , "char *argv[]" Li );
+.Vt char* Li ( Ns Vt *csvfcb_t Ns Li )( Fa "char elem[]" Li );
+.sp
+.Vt csvlcb_t Va csv_line_callback ;
+.Vt csvfcb_t Va csv_field_callback ;
+.
+.Ft int Fn csvparse void
+.
+.Sh DESCRIPTION
+.Nm
+parses a CSV file.
+Parsing commences with a call to
+.Fn csvparse .
+.Pp
+For each line, it calls a user-defined
+callback function assigned to
+.Va csv_line_callback .
+That function is called with 2 arguments,
+.Fa argc ,
+the number of fields on the line, and 
+.Fa argv ,
+the fields on the line as an array of strings.
+Empty fields are represented as NULL pointers. 
+The function returns
+.Dv true
+or
+.Dv false
+to indicate whether the line is acceptable.  If the function returns
+.Dv false,
+.Fn csvparse
+returns immediately with the value 1.
+.Pp
+.Nm
+frees the pointers in
+.Va argv
+when the callback returns.  If the data will be needed later, copy
+them to your own variables.
+.Xr strdup 3
+is your friend. 
+.Pp
+The user may also define a field-validation function,
+.Va csv_field_callback .
+That function is passed the parsed field.  The function is free to
+alter the string or replace it, but not extend it.  If the function
+returns a different pointer than was passed to it, that pointer is
+taken as the corrected data for the field. The user should ensure the pointer is valid to pass to
+.Xr free 3 ;
+.Nm
+will ensure that any memory it allocates is freed after each line is processed.
+NULL is a valid return value. 
+.
+.Sh Variables
+.Bl -tag -width stdin
+.It Vt FILE* Va csvin
+Input is read from
+.Va csvin .
+Simply assign the return value of
+.Xr fopen 3
+to that variable. If your data are already in memory, glibc provides
+.Xr fmemopen 3
+to open memory as a stream. 
+.It Vt csvlcb_t Va csv_line_callback
+The line-callback function
+.It Vt csvfcb_t Va csv_field_callback
+The field callback function
+.El
+.Pp
+By default, the data are printed on standard output, with quotes
+removed. This default might not be very useful, but does give a
+quick-and-dirty way to see what's being parsed.
+.\" .Sh IMPLEMENTATION NOTES
+.Sh RETURN VALUES
+If the entire file is successfully parsed,
+.Fn csvparse
+returns 0.  If the function defined for
+.Va csv_line_callback
+returns
+.Dv false ,
+.Fn csvparse
+returns 1.
+.\" .Sh FILES
+.
+.Sh EXAMPLES
+.Bd -literal
+#include <csvany.h>
+#include <err.h>
+
+bool line_handler( int argc, char *argv[] );
+
+int foo( const char filename[] ) {
+    int erc;
+    csv_line_callback = line_handler;
+    
+    if( (csvin = fopen(filename, "r")) == NULL ) {
+      err(EXIT_FAILURE, "could not open %s", filename);
+    }
+
+    if( (erc = csvparse()) != EXIT_SUCCESS ) {
+      return erc;
+    }
+    
+}
+.Ed
+.
+.\" .Sh COMPATIBILITY
+.\" .Sh ERRORS
+.Sh SEE ALSO
+.Xr csvany 1
+.Xr bison 3
+.Xr fmemopen 3
+.Rs
+.%T IETF RFC 4180
+.Re
+.
+.Sh STANDARDS
+.Nm
+parses files as defined by RFC 4180 with some allowances.  Contrary to
+the RFC,
+.Bl -bullet
+.It
+lines are not required to have a consistent number of fields
+.It
+lines may end in a comma, indicating missing data in the last field
+.It
+blank lines are ignored
+.It
+the final line need not end in a newline
+.It
+a "newline" (ASCII NL) may or may not be preceded by a carriage return
+(ASCII CR)
+.El
+.Pp
+Per the RFC, spaces in the data are included in the parsed output,
+including leading and trailing blanks. Contrary to the RFC, quoted
+fields may have blanks surrounding the comma separators, and
+.Nm
+ignores them.  
+.Sh HISTORY
+.Nm
+exists because so many try to parse CSV files with regular
+expressions.  The CSV grammar is technically a context-free language,
+and as such cannot be expressed as a regular expression. More powerful
+tools such as yacc can do the job easily, but are outside the ken of
+most programmers. So, at the risk of using a sledgehammer to kill a
+fly, yacc was thus employed.
+.Pp
+There are other free libraries for CSV parsing.  Some are
+undocumented; others quite baroque.
+.Nm
+suits the author's taste: minimalist, yet fully functional.  It has
+one function to call and at most two to define.  Nothing to
+initialize, and no options for out-of-spec input.
+.Pp
+If your preferences/needs dictate a more elaborate approach, you may
+wish to try libcsv by Robert Gamble
+(https://github.com/rgamble/libcsv).
+.
+.Sh AUTHORS
+.Nm
+was written by James K. Lowden (jklowden@acm.org).
+.
+.Sh CAVEATS
+.Nm
+returns no errors other than a return value of 1. Memory exhaustion
+(for one line of data) is so rare these days that an out-of-memory
+condition is handled by printing a message on stderr and calling
+.Xr exit 3
+with a value of 1. If that presents a problem, let's talk.
+.Nm
+as of this writing is not widely used.  If you encounter a problem
+with your CSV file, the author would welcome the opportunity to
+correct the error.
+.
+.\" .Sh BUGS
