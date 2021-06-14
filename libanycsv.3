@@ -81,6 +81,10 @@ The current input line number
 .Pp
 By default, the data are printed on standard output, with quotes
 removed. It gives a quick-and-dirty way to see what's being parsed.
+To restore the default behavior, set
+.Va csv_line_callback
+to NULL.
+.
 .\" .Sh IMPLEMENTATION NOTES
 .Sh RETURN VALUES
 If the entire file is successfully parsed,
