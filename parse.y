@@ -3,6 +3,7 @@
 #include <err.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 static struct line_t {
     size_t capacity, nfld;
@@ -12,10 +13,13 @@ static struct line_t {
 static void add_field(char field[]);
 static void free_fields();
 
-static int recapitulate( int nelem, char *elems[] );
+static bool recapitulate( int nelem, char *elems[] );
 
-typedef int (*csvcb_t)( int, char *elems[] );
-csvcb_t csv_callback = recapitulate;
+typedef bool (*csvlcb_t)( int, char *elems[] );
+csvlcb_t csv_line_callback = recapitulate;
+
+typedef char * (*csvfcb_t)( char elem[] );
+csvfcb_t csv_field_callback = NULL;
 
 extern int yylineno, yyleng;
 
@@ -33,6 +37,7 @@ void yyerror( char const *s );
 %%
 
 file:		lines
+	|	%empty
 		;
 
 lines:		line
@@ -42,8 +47,15 @@ lines:		line
 line:		fields EOL
 		{
 		    add_field($2);
-		    assert(csv_callback);
-		    csv_callback(line.nfld, line.flds);
+		    assert(csv_line_callback);
+		    if( ! csv_line_callback(line.nfld, line.flds) ) YYABORT; 
+		    free_fields();
+		}
+	|	EOL
+		{
+		    add_field($1);
+		    assert(csv_line_callback);
+		    if( ! csv_line_callback(line.nfld, line.flds) ) YYABORT; 
 		    free_fields();
 		}
 		;
@@ -70,6 +82,13 @@ add_field(char field[]) {
 	    err(EXIT_FAILURE, "no memory for %zu fields", L.capacity);
 	}
 	line = L;
+    }
+    if( csv_field_callback ) {
+	char *f;
+	if( (f = csv_field_callback(field)) != field ) {
+	    free(field);
+	    field = f;
+	}
     }
     line.flds[line.nfld++] = field;
 }
@@ -157,7 +176,7 @@ set_rs( const char sep[] ) {
     set_separator( &outsep.rs, sep );
 }
 
-static int
+static bool
 recapitulate( int nelem, char *elems[] ) {
     char *comma = "";
 
@@ -170,6 +189,6 @@ recapitulate( int nelem, char *elems[] ) {
 
     printf("\n");
 
-    return 0; // 1 for error
+    return true;
 }
 

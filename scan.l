@@ -23,23 +23,23 @@ void yyerror( char const *s );
 %}
 
 NUM    [[:digit:]]+
-DATA   [^\r\n,]+
+DATA   [^\r\n,]
 QUOTE  [[:blank:]]*[""]
 
 %x quote
 		
 %%
 
-{DATA}             { field = strdup(yytext); }
+\r?\n              { return set_yylval(EOL); }
 
-^{QUOTE}/{DATA}    { yy_push_state(quote); } 
-,{QUOTE}/{DATA}    { yy_push_state(quote); return set_yylval(FIELD); }
+[^"",]{DATA}*      { field = strdup(yytext); }
+
+^{QUOTE}           { yy_push_state(quote); } 
+,{QUOTE}/.         { yy_push_state(quote); return set_yylval(FIELD); }
 
 [,]                { return set_yylval(FIELD); }
 
 ^[[:blank:]]*\r?\n {  /* ignore blank lines*/  }
-
-\r?\n              { return set_yylval(EOL); }
 
 .                  { yyerror(yytext); errx(EXIT_FAILURE, "default rule"); }
 
@@ -56,18 +56,18 @@ QUOTE  [[:blank:]]*[""]
 
 static void
 append_field(const char text[]) {
-    char *data;
+    char *data, *extant = field? field : "";
+
+    int n = asprintf( &data, "%s%s", extant, text );
+    if( n == -1 ) {
+	err(EXIT_FAILURE, "%s(%s, %s)", __func__, extant, text);
+    }
+    free(field);
+    field = data;
 
     if( warn_quoted ) {
 	warn_if( field );
     }
-    
-    int n = asprintf( &data, "%s%s", field, text );
-    if( n == -1 ) {
-	err(EXIT_FAILURE, "strcat(%s, %s)", field, text);
-    }
-    free(field);
-    field = data;
 }
 
 static int

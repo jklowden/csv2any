@@ -4,11 +4,11 @@ YFLAGS = -t -k  --report-file=parser.out --verbose
 YACC = bison
 
 CPPFLAGS = -D_GNU_SOURCE
-CFLAGS   = -fPIC -g -O0 -Wall
+CFLAGS   = -std=c11 -fPIC -g -O0 -Wall
 
 PREFIX = /usr/local
 
-all: libcsv.so csv2any
+all: libanycsv.so csv2any
 
 csv2any: main.o
 	$(CC) -o $@ $^ \
@@ -16,7 +16,7 @@ csv2any: main.o
 	-L$(PREFIX) -Wl,-rpath -Wl,$(PREFIX) \
 	-lcsv
 
-libcsv.so: parse.o scan.o
+libanycsv.so: parse.o scan.o
 	$(CC) -o $@ -shared $(CPPFLAGS) $(CFLAGS) $^
 
 scan.o: scan.c
@@ -29,8 +29,8 @@ tags: TAGS
 TAGS:
 	etags *.[yl] main.c parse.h
 
-install: csv2any libcsv.so 
+install: csv2any libanycsv.so 
 	install csv2any   $(PREFIX)/bin/
 	install csv2any.1 $(PREFIX)/share/man/man1/
-	install libcsv.so $(PREFIX)/lib/
-	install libcsv.3  $(PREFIX)/share/man/man3/
+	install libanycsv.so $(PREFIX)/lib/
+	install libanycsv.3  $(PREFIX)/share/man/man3/
