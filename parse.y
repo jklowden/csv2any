@@ -49,14 +49,14 @@ lines:		line
 line:		fields EOL
 		{
 		    add_field($2);
-		    assert(csv_line_callback);
+		    if( ! csv_line_callback ) csv_line_callback = recapitulate;
 		    if( ! csv_line_callback(line.nfld, line.flds) ) YYABORT; 
 		    free_fields();
 		}
 	|	EOL
 		{
 		    add_field($1);
-		    assert(csv_line_callback);
+		    if( ! csv_line_callback ) csv_line_callback = recapitulate;
 		    if( ! csv_line_callback(line.nfld, line.flds) ) YYABORT; 
 		    free_fields();
 		}

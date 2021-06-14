@@ -75,11 +75,12 @@ to open memory as a stream.
 The line-callback function
 .It Vt csvfcb_t Va csv_field_callback
 The field callback function
+.It Vt int Va csvlineno
+The current input line number
 .El
 .Pp
 By default, the data are printed on standard output, with quotes
-removed. This default might not be very useful, but does give a
-quick-and-dirty way to see what's being parsed.
+removed. It gives a quick-and-dirty way to see what's being parsed.
 .\" .Sh IMPLEMENTATION NOTES
 .Sh RETURN VALUES
 If the entire file is successfully parsed,
@@ -134,7 +135,8 @@ lines are not required to have a consistent number of fields
 .It
 lines may end in a comma, indicating missing data in the last field
 .It
-blank lines are ignored
+blank lines are ignored (and do not trigger
+.Va csv_line_callback Ns Li ). 
 .It
 the final line need not end in a newline
 .It
