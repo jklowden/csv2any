@@ -16,7 +16,7 @@ all: libanycsv.so csv2any
 csv2any: main.o csvany.h| libanycsv.so
 	$(CC) -o $@ $< \
 	-L$(PWD) -Wl,-rpath -Wl,$(PWD) \
-	-L$(PREFIX) -Wl,-rpath -Wl,$(PREFIX) \
+	-L$(PREFIX)/lib -Wl,-rpath -Wl,$(PREFIX)/lib \
 	-lanycsv
 
 libanycsv.so: parse.o scan.o
@@ -37,8 +37,8 @@ install: csv2any libanycsv.so
 	mkdir -p $(PREFIX)/bin/ $(PREFIX)/share/man/man1/ \
 		 $(PREFIX)/lib/ $(PREFIX)/share/man/man3/
 
-	install csv2any   $(PREFIX)/bin/
-	install csv2any.1 $(PREFIX)/share/man/man1/
-	install libanycsv.so $(PREFIX)/lib/
-	install libanycsv.3  $(PREFIX)/share/man/man3/
+	install         csv2any      $(PREFIX)/bin/
+	install -m 0644 csv2any.1    $(PREFIX)/share/man/man1/
+	install         libanycsv.so $(PREFIX)/lib/
+	install -m 0644 libanycsv.3  $(PREFIX)/share/man/man3/
 
