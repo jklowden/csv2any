@@ -12,7 +12,7 @@ SONAME = libanycsv.so.0
 
 PWD ?= $(shell pwd)
 
-all: libanycsv.so csv2any
+all: $(SONAME) csv2any
 
 csv2any: main.o csvany.h | $(SONAME)
 	$(CC) -o $@ $< \
