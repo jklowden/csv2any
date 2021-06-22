@@ -34,7 +34,7 @@ tags: TAGS
 TAGS: $(SRC)
 	etags $^
 
-install: csv2any libanycsv.so
+install: csv2any $(SONAME)
 	mkdir -p $(PREFIX)/bin/ $(PREFIX)/share/man/man1/ \
 		 $(PREFIX)/lib/ $(PREFIX)/share/man/man3/
 
