@@ -8,19 +8,20 @@ CFLAGS   = -std=c11 -fPIC -g -O0 -Wall
 
 DESTDIR = /usr/local
 PREFIX = $(DESTDIR)
+SONAME = libanycsv.so.0
 
 PWD ?= $(shell pwd)
 
 all: libanycsv.so csv2any
 
-csv2any: main.o csvany.h| libanycsv.so
+csv2any: main.o csvany.h | $(SONAME)
 	$(CC) -o $@ $< \
 	-L$(PWD) -Wl,-rpath -Wl,$(PWD) \
 	-L$(PREFIX)/lib -Wl,-rpath -Wl,$(PREFIX)/lib \
 	-lanycsv
 
-libanycsv.so: parse.o scan.o
-	$(CC) -o $@ -shared $(CPPFLAGS) $(CFLAGS) $^ -Wl,-soname,libanycsv.so.0
+$(SONAME): parse.o scan.o
+	$(CC) -o $@ -shared $(CPPFLAGS) $(CFLAGS) $^ -Wl,-soname,$(SONAME)
 
 scan.o: scan.c
 	$(CC) -c -o$@ $(CPPFLAGS) $(subst -Wall,,$(CFLAGS)) $^
@@ -41,4 +42,4 @@ install: csv2any libanycsv.so
 	install -m 0644 csv2any.1    $(PREFIX)/share/man/man1/
 	install         libanycsv.so $(PREFIX)/lib/
 	install -m 0644 libanycsv.3  $(PREFIX)/share/man/man3/
-
+	cd $(PREFIX)/lib && ln -s $(SONAME) $(subst .so.0,.so,$(SONAME))
