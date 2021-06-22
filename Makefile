@@ -40,6 +40,6 @@ install: csv2any libanycsv.so
 
 	install         csv2any      $(PREFIX)/bin/
 	install -m 0644 csv2any.1    $(PREFIX)/share/man/man1/
-	install         libanycsv.so $(PREFIX)/lib/
+	install         $(SONAME)    $(PREFIX)/lib/
 	install -m 0644 libanycsv.3  $(PREFIX)/share/man/man3/
 	cd $(PREFIX)/lib && ln -s $(SONAME) $(subst .so.0,.so,$(SONAME))
