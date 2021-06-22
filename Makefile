@@ -20,7 +20,7 @@ csv2any: main.o csvany.h| libanycsv.so
 	-lanycsv
 
 libanycsv.so: parse.o scan.o
-	$(CC) -o $@ -shared $(CPPFLAGS) $(CFLAGS) $^
+	$(CC) -o $@ -shared $(CPPFLAGS) $(CFLAGS) $^ -Wl,-soname,libanycsv.so.0
 
 scan.o: scan.c
 	$(CC) -c -o$@ $(CPPFLAGS) $(subst -Wall,,$(CFLAGS)) $^
