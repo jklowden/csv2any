@@ -6,7 +6,8 @@ YACC = bison
 CPPFLAGS = -D_GNU_SOURCE
 CFLAGS   = -std=c11 -fPIC -g -O0 -Wall
 
-PREFIX = /usr/local
+DESTDIR = /usr/local
+PREFIX = $(DESTDIR)
 
 PWD ?= $(shell pwd)
 
@@ -38,15 +39,3 @@ install: csv2any libanycsv.so
 	install libanycsv.so $(PREFIX)/lib/
 	install libanycsv.3  $(PREFIX)/share/man/man3/
 
-VERSION = 1.0
-
-tar: csv2any-$(VERSION).tar.gz
-
-csv2any-$(VERSION).tar: Makefile $(SRC) csv2any.h csv2any.1 libanycsv.3 
-	pax -wf $@ $^
-
-ARCHIVE = https://github.com/jklowden/csv2any/archive/refs/tags
-
-download: csv2any-$(VERSION).tar.gz
-csv2any-$(VERSION).tar.gz:
-	tnftp -o $@ $(ARCHIVE)/v$(VERSION).tar.gz
